@@ -28,10 +28,24 @@ async function run() {
         // .limit(6)
 
         const allFoods = client.db("communityFoodSharingDB").collection('allFoods');
+        const requestFoods = client.db("communityFoodSharingDB").collection('requestFoods');
 
         app.get('/all-foods', async (req, res) => {
             const count = await allFoods.estimatedDocumentCount();
             const result = await allFoods.find().sort({ quantity: -1 }).toArray();
+            res.send(result);
+        })
+        
+        app.get('/requested-foods', async (req, res) => {
+            const email = req.query.email;
+            const result = await requestFoods.find({ userEmail: email }).toArray();
+            res.send(result);
+        })
+
+        app.get('/manage-foods', async (req, res) => {
+            const email = req.query.email;
+            // console.log(email)
+            const result = await requestFoods.find({ donorEmail: email }).toArray();
             res.send(result);
         })
 
@@ -44,9 +58,17 @@ async function run() {
             console.log("data", result)
         })
 
+        app.post('/add-food', async (req, res) => {
+            const food = req.body;
+            const result = await allFoods.insertOne(food);
+            res.send(result);
+        })
 
-
-
+        app.post('/requested-foods', async (req, res) => {
+            const food = req.body;
+            const result = await requestFoods.insertOne(food);
+            res.send(result);
+        })
         // Send a ping to confirm a successful connection
         await client.db("admin").command({ ping: 1 });
         console.log("Pinged your deployment. You successfully connected to MongoDB!");
