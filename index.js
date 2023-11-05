@@ -1,11 +1,11 @@
 const express = require('express');
 const app = express();
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const port = process.env.PORT || 5000;
 require('dotenv').config();
 
-console.log(process.env.DB_NAME)
-console.log(process.env.DB_PASS)
+// console.log(process.env.DB_NAME)
+// console.log(process.env.DB_PASS)
 
 const cors = require('cors');
 app.use(cors());
@@ -33,6 +33,15 @@ async function run() {
             const count = await allFoods.estimatedDocumentCount();
             const result = await allFoods.find().sort({ quantity: -1 }).toArray();
             res.send(result);
+        })
+
+        app.get('/view-details/:id', async (req, res) => {
+            const id = req.params.id;
+            console.log("Id", id)
+            const query = { _id: new ObjectId(id) };
+            const result = await allFoods.findOne(query);
+            res.send(result)
+            console.log("data", result)
         })
 
 
