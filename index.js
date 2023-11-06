@@ -84,6 +84,16 @@ async function run() {
             }
         })
 
+        app.get('/avaiable-food', async (req, res) => {
+            const sort = req.query.sort;
+            if (sort == 'ascending') {
+                const result = await allFoods.find().sort({ quantity: 1 }).toArray();
+                return res.send(result)
+            } 
+            const result = await allFoods.find().sort({ quantity: -1 }).toArray();
+            res.send(result)
+        })
+
         app.post('/add-food', async (req, res) => {
             const food = req.body;
             const result = await allFoods.insertOne(food);
