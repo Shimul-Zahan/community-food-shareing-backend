@@ -42,21 +42,34 @@ async function run() {
             res.send(result);
         })
 
+        app.get('/all-requested-foods', async (req, res) => {
+            const result = await requestFoods.find().toArray();
+            res.send(result);
+        })
+
         app.get('/manage-foods', async (req, res) => {
             const userEmail = req.query.email;
-            console.log(userEmail)
+            // console.log(userEmail)
             const result = await allFoods.find({ donorEmail: userEmail }).toArray();
             res.send(result)
-            console.log(result);
+            // console.log(result);
         })
 
         app.get('/view-details/:id', async (req, res) => {
             const id = req.params.id;
-            console.log("Id", id)
+            // console.log("Id", id)
             const query = { _id: new ObjectId(id) };
             const result = await allFoods.findOne(query);
             res.send(result)
-            console.log("data", result)
+            // console.log("data", result)
+        })
+
+        app.get('/manage-single-food/:id', async (req, res) => {
+            const id = req.params.id;
+            console.log(id)
+            const result = await requestFoods.findOne({ foodId: id })
+            res.send(result);
+            console.log(result);
         })
 
         app.post('/add-food', async (req, res) => {
@@ -70,6 +83,7 @@ async function run() {
             const result = await requestFoods.insertOne(food);
             res.send(result);
         })
+
         // Send a ping to confirm a successful connection
         await client.db("admin").command({ ping: 1 });
         console.log("Pinged your deployment. You successfully connected to MongoDB!");
