@@ -72,6 +72,18 @@ async function run() {
             console.log(result);
         })
 
+        app.get('/avaiable-foods', async (req, res) => {
+            const search = req.query.search;
+            if (search) {
+                const regex = new RegExp(`\\b${search}`, 'iu');
+                const result = await allFoods.find({ foodName: regex }).toArray();
+                return res.send(result);
+            } else {
+                const result = await allFoods.find().toArray();
+                return res.send(result);
+            }
+        })
+
         app.post('/add-food', async (req, res) => {
             const food = req.body;
             const result = await allFoods.insertOne(food);
