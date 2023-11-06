@@ -43,10 +43,11 @@ async function run() {
         })
 
         app.get('/manage-foods', async (req, res) => {
-            const email = req.query.email;
-            // console.log(email)
-            const result = await requestFoods.find({ donorEmail: email }).toArray();
-            res.send(result);
+            const userEmail = req.query.email;
+            console.log(userEmail)
+            const result = await allFoods.find({ donorEmail: userEmail }).toArray();
+            res.send(result)
+            console.log(result);
         })
 
         app.get('/view-details/:id', async (req, res) => {
