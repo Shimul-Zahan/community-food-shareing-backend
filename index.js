@@ -66,10 +66,10 @@ async function run() {
 
         app.get('/manage-single-food/:id', async (req, res) => {
             const id = req.params.id;
-            // console.log(id)
+            // console.log(id);
             const result = await requestFoods.findOne({ foodId: id })
             res.send(result);
-            console.log(result);
+            // console.log(result);
         })
 
         app.get('/avaiable-foods', async (req, res) => {
@@ -129,6 +129,19 @@ async function run() {
             res.send(result);
         })
 
+        app.patch('/approve-request/:id', async (req, res) => {
+            const updateStatus = req.body;
+            const id = req.params.id;
+            const filter = { _id: new ObjectId(id) };
+            const updateDoc = {
+                $set: {
+                    status: updateStatus.status,
+                },
+            };
+            const result = await requestFoods.updateOne(filter, updateDoc);
+            console.log(result)
+            res.send(result);
+        })
         app.delete('/delete-food/:id', async (req, res) => {
             const id = req.params.id;
             const result = await allFoods.deleteOne({ _id: new ObjectId(id) });
