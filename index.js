@@ -66,7 +66,7 @@ async function run() {
 
         app.get('/manage-single-food/:id', async (req, res) => {
             const id = req.params.id;
-            console.log(id)
+            // console.log(id)
             const result = await requestFoods.findOne({ foodId: id })
             res.send(result);
             console.log(result);
@@ -103,6 +103,29 @@ async function run() {
         app.post('/requested-foods', async (req, res) => {
             const food = req.body;
             const result = await requestFoods.insertOne(food);
+            res.send(result);
+        })
+
+        app.put('/update-food/:id', async (req, res) => {
+            const updateFood = req.body;
+            const id = req.params.id;
+            const filter = { _id: new ObjectId(id) };
+            const options = { upsert: true };
+            const updateDoc = {
+                $set: {
+                    foodImage: updateFood.foodImage,
+                    foodName: updateFood.foodName,
+                    quantity: updateFood.quantity,
+                    additionalNotes: updateFood.additionalNotes,
+                    status: updateFood.status,
+                    donatorImage: updateFood.donatorImage,
+                    donatorName: updateFood.donatorName,
+                    donorEmail: updateFood.donorEmail,
+                    pickupLocation: updateFood.pickupLocation,
+                    expiredDate: updateFood.expiredDate,
+                },
+            };
+            const result = await allFoods.updateOne(filter, updateDoc, options);
             res.send(result);
         })
 
