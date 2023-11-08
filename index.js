@@ -154,16 +154,20 @@ async function run() {
 
         app.patch('/approve-request/:id', async (req, res) => {
             const updateStatus = req.body;
+            const status = updateStatus.status;
+            const foodid = updateStatus.foodId;
             const id = req.params.id;
             const filter = { _id: new ObjectId(id) };
+            const query = { _id: new ObjectId(foodid) };
             const updateDoc = {
                 $set: {
                     status: updateStatus.status,
                 },
             };
             const result = await requestFoods.updateOne(filter, updateDoc);
-            console.log(result)
-            res.send(result);
+            const result2 = await allFoods.updateOne(query, updateDoc)
+            console.log(result, result2)
+            res.send({result});
         })
         app.delete('/delete-food/:id', async (req, res) => {
             const id = req.params.id;
