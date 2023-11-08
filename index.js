@@ -47,9 +47,6 @@ const security = (req, res, next) => {
 
 async function run() {
     try {
-        // Connect the client to the server	(optional starting in v4.7)
-        // await client.connect();
-        // .limit(6)
 
         const allFoods = client.db("communityFoodSharingDB").collection('allFoods');
         const requestFoods = client.db("communityFoodSharingDB").collection('requestFoods');
@@ -60,26 +57,24 @@ async function run() {
             res.send(result);
         })
 
-        app.get('/requested-foods', async (req, res) => {
+        app.get('/requested-foods', security, async (req, res) => {
             const email = req.query.email;
             const result = await requestFoods.find({ userEmail: email }).toArray();
             res.send(result);
         })
 
-        app.get('/all-requested-foods', async (req, res) => {
+        app.get('/all-requested-foods', security, async (req, res) => {
             const result = await requestFoods.find().toArray();
             res.send(result);
         })
 
-        app.get('/manage-foods', async (req, res) => {
+        app.get('/manage-foods', security, async (req, res) => {
             const userEmail = req.query.email;
-            // console.log(userEmail)
             const result = await allFoods.find({ donorEmail: userEmail }).toArray();
             res.send(result)
-            // console.log(result);
         })
 
-        app.get('/view-details/:id', async (req, res) => {
+        app.get('/view-details/:id', security, async (req, res) => {
             const id = req.params.id;
             // console.log("Id", id)
             const query = { _id: new ObjectId(id) };
@@ -88,7 +83,7 @@ async function run() {
             // console.log("data", result)
         })
 
-        app.get('/manage-single-food/:id', async (req, res) => {
+        app.get('/manage-single-food/:id', security, async (req, res) => {
             const id = req.params.id;
             // console.log(id);
             const result = await requestFoods.findOne({ foodId: id })
@@ -170,6 +165,7 @@ async function run() {
             console.log(result, result2)
             res.send({result});
         })
+        
         app.delete('/delete-food/:id', async (req, res) => {
             const id = req.params.id;
             const result = await allFoods.deleteOne({ _id: new ObjectId(id) });
@@ -185,16 +181,17 @@ async function run() {
         app.post('/jwt', (req, res) => {
             const email = req.body;
             const token = jwt.sign(email, process.env.SECRET, { expiresIn: '10h' })
-            // console.log(token)
+            console.log(token)
             res.cookie('token', token, {
                 httpOnly: true,
-                secure: false,
+                secure: process.env.NODE_ENV === 'production',
+                sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
             }).send({ success: token })
         })
 
         app.post('/logout', (req, res) => {
             const user = req.body;
-            res.clearCookie('token', {maxAge: 0}).send({success: true})
+            res.clearCookie('token', { maxAge: 0, sameSite: 'none', secure: true }).send({success: true})
         })
 
         // Send a ping to confirm a successful connection
