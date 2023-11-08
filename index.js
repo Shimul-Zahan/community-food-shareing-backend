@@ -12,7 +12,8 @@ require('dotenv').config();
 const cors = require('cors');
 app.use(cors({
     origin: [
-        'http://localhost:5173'
+        'http://localhost:5173',
+        'https://community-food-sharing-36bb7.web.app'
     ],
     credentials: true,
 }));
@@ -53,7 +54,7 @@ async function run() {
         const allFoods = client.db("communityFoodSharingDB").collection('allFoods');
         const requestFoods = client.db("communityFoodSharingDB").collection('requestFoods');
 
-        app.get('/all-foods', security, async (req, res) => {
+        app.get('/all-foods', async (req, res) => {
             const count = await allFoods.estimatedDocumentCount();
             const result = await allFoods.find().sort({ quantity: -1 }).toArray();
             res.send(result);
@@ -197,7 +198,7 @@ async function run() {
         })
 
         // Send a ping to confirm a successful connection
-        await client.db("admin").command({ ping: 1 });
+        // await client.db("admin").command({ ping: 1 });
         console.log("Pinged your deployment. You successfully connected to MongoDB!");
     } finally {
         // Ensures that the client will close when you finish/error
