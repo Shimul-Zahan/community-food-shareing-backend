@@ -12,8 +12,9 @@ require('dotenv').config();
 const cors = require('cors');
 app.use(cors({
     origin: [
-        'http://localhost:5173',
-        'https://community-food-sharing-36bb7.web.app'
+        // 'http://localhost:5173',
+        'https://community-food-sharing-36bb7.web.app',
+        'community-food-sharing-36bb7.firebaseapp.com'
     ],
     credentials: true,
 }));
@@ -38,9 +39,10 @@ const security = (req, res, next) => {
     }
     jwt.verify(token, process.env.SECRET, (err, decoded) => {
         if (err) {
-            return res.status(403).send({message: 'Access forbiden'})
+            return res.status(403).send({ message: 'Access forbiden' })
         }
         req.decode = decoded
+        // console.log(req.decode)
         next();
     })
 }
@@ -53,12 +55,15 @@ async function run() {
 
         app.get('/all-foods', async (req, res) => {
             const count = await allFoods.estimatedDocumentCount();
-            const result = await allFoods.find().sort({ quantity: -1 }).toArray();
+            const result = await allFoods.find({ status: 'available' }).sort({ quantity: -1 }).toArray();
             res.send(result);
         })
 
         app.get('/requested-foods', security, async (req, res) => {
             const email = req.query.email;
+            const token = req.body.cookies
+            console.log(email)
+            console.log(token)
             const result = await requestFoods.find({ userEmail: email }).toArray();
             res.send(result);
         })
@@ -80,8 +85,8 @@ async function run() {
             const query = { _id: new ObjectId(id) };
             const result = await allFoods.findOne(query);
             res.send(result)
-            // console.log("data", result)
         })
+
 
         app.get('/manage-single-food/:id', security, async (req, res) => {
             const id = req.params.id;
@@ -111,6 +116,12 @@ async function run() {
             }
             const result = await allFoods.find().sort({ expiredDate: -1 }).toArray();
             res.send(result)
+        })
+
+        app.get('/statistics', async (req, res) => {
+            console.log('hit stat')
+            // const count = await allFoods.distinct("donorEmail");
+            // res.send({count});
         })
 
         app.post('/add-food', async (req, res) => {
@@ -163,9 +174,9 @@ async function run() {
             const result = await requestFoods.updateOne(filter, updateDoc);
             const result2 = await allFoods.updateOne(query, updateDoc)
             console.log(result, result2)
-            res.send({result});
+            res.send({ result });
         })
-        
+
         app.delete('/delete-food/:id', async (req, res) => {
             const id = req.params.id;
             const result = await allFoods.deleteOne({ _id: new ObjectId(id) });
@@ -191,7 +202,7 @@ async function run() {
 
         app.post('/logout', (req, res) => {
             const user = req.body;
-            res.clearCookie('token', { maxAge: 0, sameSite: 'none', secure: true }).send({success: true})
+            res.clearCookie('token', { maxAge: 0, sameSite: 'none', secure: true }).send({ success: true })
         })
 
         // Send a ping to confirm a successful connection
