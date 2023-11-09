@@ -14,7 +14,6 @@ app.use(cors({
     origin: [
         // 'http://localhost:5173',
         'https://community-food-sharing-36bb7.web.app',
-        'community-food-sharing-36bb7.firebaseapp.com'
     ],
     credentials: true,
 }));
@@ -61,25 +60,22 @@ async function run() {
 
         app.get('/requested-foods', security, async (req, res) => {
             const email = req.query.email;
-            const token = req.body.cookies
-            console.log(email)
-            console.log(token)
-            const result = await requestFoods.find({ userEmail: email }).toArray();
+            const result = await requestFoods.find({userEmail: email, status: 'pending' }).toArray();
             res.send(result);
         })
 
         app.get('/all-requested-foods', security, async (req, res) => {
-            const result = await requestFoods.find().toArray();
+            const result = await requestFoods.find({ status: 'available' }).toArray();
             res.send(result);
         })
 
         app.get('/manage-foods', security, async (req, res) => {
             const userEmail = req.query.email;
-            const result = await allFoods.find({ donorEmail: userEmail }).toArray();
+            const result = await allFoods.find({ donorEmail: userEmail, status: 'available' }).toArray();
             res.send(result)
         })
 
-        app.get('/view-details/:id', security, async (req, res) => {
+        app.get('/view-details/:id', async (req, res) => {
             const id = req.params.id;
             // console.log("Id", id)
             const query = { _id: new ObjectId(id) };
@@ -88,10 +84,10 @@ async function run() {
         })
 
 
-        app.get('/manage-single-food/:id', security, async (req, res) => {
+        app.get('/manage-single-food/:id', async (req, res) => {
             const id = req.params.id;
             // console.log(id);
-            const result = await requestFoods.findOne({ foodId: id })
+            const result = await requestFoods.findOne({ foodId: id, status: 'pending' })
             res.send(result);
             // console.log(result);
         })
@@ -111,17 +107,11 @@ async function run() {
         app.get('/avaiable-food', async (req, res) => {
             const sort = req.query.sort;
             if (sort == 'ascending') {
-                const result = await allFoods.find().sort({ expiredDate: 1 }).toArray();
+                const result = await allFoods.find({ status: 'available' }).sort({ expiredDate: 1 }).toArray();
                 return res.send(result)
             }
-            const result = await allFoods.find().sort({ expiredDate: -1 }).toArray();
+            const result = await allFoods.find({ status: 'available' }).sort({ expiredDate: -1 }).toArray();
             res.send(result)
-        })
-
-        app.get('/statistics', async (req, res) => {
-            console.log('hit stat')
-            // const count = await allFoods.distinct("donorEmail");
-            // res.send({count});
         })
 
         app.post('/add-food', async (req, res) => {
