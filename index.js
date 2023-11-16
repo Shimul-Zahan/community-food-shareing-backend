@@ -13,7 +13,8 @@ const cors = require('cors');
 app.use(cors({
     origin: [
         // 'http://localhost:5173',
-        'https://community-food-sharing-36bb7.web.app',
+        // 'https://community-food-sharing-36bb7.web.app',
+        'https://terrific-territory.surge.sh',
     ],
     credentials: true,
 }));
@@ -60,7 +61,7 @@ async function run() {
 
         app.get('/requested-foods', security, async (req, res) => {
             const email = req.query.email;
-            const result = await requestFoods.find({userEmail: email, status: 'pending' }).toArray();
+            const result = await requestFoods.find({ userEmail: email }).toArray();
             res.send(result);
         })
 
@@ -96,7 +97,7 @@ async function run() {
             const search = req.query.search;
             if (search) {
                 const regex = new RegExp(`\\b${search}`, 'iu');
-                const result = await allFoods.find({ foodName: regex }).toArray();
+                const result = await allFoods.find({ foodName: regex, status: 'available' }).toArray();
                 return res.send(result);
             } else {
                 const result = await allFoods.find().toArray();
